@@ -15,10 +15,10 @@ import java.nio.charset.StandardCharsets;
  * @since 2022.07.17
  */
 public class NettyServer {
-    EventLoopGroup bossGroup = new NioEventLoopGroup();
-    EventLoopGroup workerGroup = new NioEventLoopGroup();
+    private volatile EventLoopGroup bossGroup = new NioEventLoopGroup();
+    private volatile EventLoopGroup workerGroup = new NioEventLoopGroup();
 
-    public void start() {
+    public synchronized void start() {
         bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup();
         ServerBootstrap bootstrap = new ServerBootstrap();
@@ -44,8 +44,14 @@ public class NettyServer {
         bootstrap.bind(30000);
     }
 
-    public void stop() {
-        this.bossGroup.shutdownGracefully();
-        this.workerGroup.shutdownGracefully();
+    public synchronized void stop() {
+        if (this.bossGroup != null) {
+            this.bossGroup.shutdownGracefully();
+            this.bossGroup = null;
+        }
+        if (this.workerGroup != null) {
+            this.workerGroup.shutdownGracefully();
+            this.workerGroup = null;
+        }
     }
 }

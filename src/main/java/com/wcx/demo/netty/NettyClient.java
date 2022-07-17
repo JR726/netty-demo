@@ -24,7 +24,7 @@ public class NettyClient {
 
     private final long end;
 
-    private EventLoopGroup worker;
+    private volatile EventLoopGroup worker;
 
     public NettyClient(boolean period, long start, long end) {
         this.period = period;
@@ -32,7 +32,7 @@ public class NettyClient {
         this.end = end;
     }
 
-    public void start() {
+    public synchronized void start() {
         Bootstrap bootstrap = new Bootstrap();
         this.worker = new NioEventLoopGroup();
         bootstrap.group(worker).option(ChannelOption.SO_KEEPALIVE, true)
@@ -74,14 +74,17 @@ public class NettyClient {
         }
 
         long delay = end - System.currentTimeMillis();
-        if (delay < 0) {
-            worker.shutdownGracefully();
+        if (delay <= 0) {
+            this.worker.shutdownGracefully();
         } else {
-            worker.schedule(this::stop, delay, TimeUnit.MILLISECONDS);
+            this.worker.schedule(this::stop, delay, TimeUnit.MILLISECONDS);
         }
     }
 
-    public void stop() {
-        worker.shutdownGracefully();
+    public synchronized void stop() {
+        if (worker != null) {
+            worker.shutdownGracefully();
+            worker = null;
+        }
     }
 }
