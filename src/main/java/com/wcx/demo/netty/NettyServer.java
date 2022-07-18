@@ -33,9 +33,7 @@ public class NettyServer {
                              @Override
                              protected void channelRead0(ChannelHandlerContext channelHandlerContext, ByteBuf o) {
                                  String result = o.toString(StandardCharsets.UTF_8);
-                                 if (!"Hello".equals(result)) {
-                                     System.out.println(result);
-                                 }
+                                 System.out.println(result);
                              }
                          });
                      }

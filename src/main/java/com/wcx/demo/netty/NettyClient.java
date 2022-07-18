@@ -7,6 +7,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.util.concurrent.ScheduledFuture;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -53,11 +54,23 @@ public class NettyClient {
                                      initialDelay = 0;
                                  }
                                  if (period) {
-                                     worker.scheduleAtFixedRate(
-                                         () -> ctx.channel()
-                                                  .writeAndFlush(Unpooled.copiedBuffer("Hello", StandardCharsets.UTF_8)),
+                                     ScheduledFuture<?> future = worker.scheduleAtFixedRate(
+                                         () -> {
+                                             ctx.channel()
+                                                .writeAndFlush(Unpooled.copiedBuffer("Hello", StandardCharsets.UTF_8));
+                                             worker.schedule(() -> {System.out.println(Thread.currentThread().getName());}, 0,
+                                                 TimeUnit.MILLISECONDS);
+                                             worker.schedule(() -> {System.out.println(Thread.currentThread().getName());}, 10,
+                                                 TimeUnit.MILLISECONDS);
+                                             worker.schedule(() -> {System.out.println(Thread.currentThread().getName());}, 20,
+                                                 TimeUnit.MILLISECONDS);
+                                         },
                                          initialDelay,
                                          1000, TimeUnit.MILLISECONDS);
+                                     worker.schedule(() -> {
+                                         System.out.println("取消了");
+                                         future.cancel(true);
+                                     }, 20, TimeUnit.SECONDS);
                                  } else {
                                      worker.scheduleWithFixedDelay(
                                          () -> ctx.channel()
@@ -69,7 +82,7 @@ public class NettyClient {
                          });
                      }
                  });
-        for (int i = 1; i <= 10000; i++) {
+        for (int i = 1; i <= 1; i++) {
             bootstrap.connect(new InetSocketAddress("127.0.0.1", 30000), new InetSocketAddress("127.0.0.1", 30000 + i));
         }
 
