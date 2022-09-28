@@ -47,7 +47,7 @@ public class NettyClient {
         TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
         // 初始化信任库
         tmf.init(ks);
-        SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
+        SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
         // 设置信任证书
         sslContext.init(null, tmf.getTrustManagers(), null);
         in.close();

@@ -47,7 +47,7 @@ public class NettyServer {
         // 初始化密钥管理器, keypass 指定别名条目的密码(私钥的密码)
         kmf.init(ks, "serverpw".toCharArray());
         // 获取安全套接字协议（TLS协议）的对象
-        SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
+        SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
         // 参数一：要给对端认证的密钥
         // 参数二：对等信任认证，如果双向认证就写成tf.getTrustManagers()
         // 参数三：伪随机数生成器
